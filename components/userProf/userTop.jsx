@@ -99,7 +99,7 @@ export default function UserTop(props) {
 
   useEffect(() => {
     checkReq();
-  }, []);
+  }, [idd]);
 
   // const newId = reqq[0]
 

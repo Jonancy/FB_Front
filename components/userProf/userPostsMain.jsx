@@ -3,7 +3,7 @@ import UserPost from "../../features/home/posts/userPost";
 import OtherPosts from "../../features/home/posts/otherPosts";
 import luffy from "../../assets/luffy.jpg";
 import { useSelector } from "react-redux";
-import { deleteUserPost, getPost, likeUsersPost } from "../../services/posts/postUser";
+import { deleteUserPost, getPost, getUserLikes, likeUsersPost } from "../../services/posts/postUser";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { BiDotsHorizontalRounded, BiHeart, BiLike, BiShare, BiX } from "react-icons/bi";
 import Popup from "reactjs-popup";
@@ -13,13 +13,14 @@ import ClickPost from "../../features/home/posts/components/clickPost";
 import { toast } from "react-toastify";
 import { checkStatusFrReq } from "../../services/friendre/friendReq";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { AiFillLike } from "react-icons/ai";
 
 export default function UserPostsMain(props) {
 
 
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([])
-  const[like,setLike] = useState(null);
+  const[like,setLike] = useState([]);
   
   const mainUser = useParams();
   const user_id = mainUser.id
@@ -61,19 +62,30 @@ export default function UserPostsMain(props) {
     }
   };
 
-  const likePost= async(post_id,index)=>{
+  const postsLikedByUse=(id)=>{
+    return like.some((like)=> like.post_id === id)
+  }
 
+  const getLiked = async () => {
+    const res = await getUserLikes();
+    setLike(res.data.data);
+  };
+
+  const likePost= async(post_id)=>{
+
+    const likedPosts = postsLikedByUse(post_id)
     const res = await likeUsersPost(post_id,user,jwt)
     console.log(res)
     const message = res.data.message
     if(res.data.success){
         
         toast.success(message)
-      if(message === 'Liked Post'){
-          setLike(index)
+      if(likedPosts){
+          setLike(like.filter((likes)=> likes.post_id !== post_id))
       }else{
-        setLike(null)
+        setLike([...like,{post_id}])
       }
+      
     }else{
       toast.error(message)
     }
@@ -89,6 +101,7 @@ export default function UserPostsMain(props) {
   
   useEffect(()=>{
     friends()
+    getLiked()
   },[user_id])
 
 
@@ -181,13 +194,14 @@ export default function UserPostsMain(props) {
                         <BiX className="cursor-pointer" />
                       </button>
                     }
-                    position="right top"
+                    position="left center"
+                    arrow={false}
                   >
                     <div className="">
                       <button className="" onClick={() => deletePost(value.id)}>
                         Yes
                       </button>
-                      <button onClick={()=>close()} className="float-right">No</button>
+                      {/* <button onClick={()=>close()} className="float-right">No</button> */}
                     </div>
                   </Popup>
                 </div>
@@ -221,11 +235,16 @@ export default function UserPostsMain(props) {
               </div>
               <div className="flex justify-around mt-2">
                {/* { //!Need to fix this or add two functions } */}
-                <div className={`hover:bg-neutral-700 w-[10rem] rounded-[10px] flex justify-center items-center gap-1 pt-2 pb-2`} onClick={()=>likePost(value.id, index) } >
-                  <BiLike className={`text-2xl ${like === index ? 'text-blue-800': 'text-black'}`} />
-                  {/* <BiLike className="text-2xl text-white" /> */}
+                <div
+                  className={`hover:bg-neutral-700 w-[10rem] rounded-[10px] flex justify-center items-center gap-1 pt-2 pb-2`}
+                  onClick={() => likePost(value.id)}
+                >
+                  {postsLikedByUse(value.id) ? (
+                    <AiFillLike className="text-2xl text-blue-800" />
+                  ) : (
+                    <AiFillLike className="text-2xl text-black" />
+                  )}
                   <p>Like</p>
-                {/* </div> */}
                 </div>
                 <Popup
                   trigger={

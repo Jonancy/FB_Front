@@ -57,6 +57,7 @@ export default function OtherPosts() {
     const message = res.data.message;
     if (res.data.success) {
       toast.success(message);
+      userPosts();
     } else {
       toast.error(message);
     }
@@ -116,15 +117,16 @@ export default function OtherPosts() {
                         <BiX className="cursor-pointer" />
                       </button>
                     }
-                    position="right top"
+                    arrow={false}
+                    position="left center"
                   >
-                    <div className="">
+                    <div className=" ">
                       <button className="" onClick={() => deletePost(value.id)}>
                         Yes
                       </button>
-                      <button onClick={() => close()} className="float-right">
+                      {/* <button onClick={() => close()} className="">
                         No
-                      </button>
+                      </button> */}
                     </div>
                   </Popup>
                 </div>

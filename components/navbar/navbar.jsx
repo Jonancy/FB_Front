@@ -63,6 +63,7 @@ export default function Navbar() {
     setUser([]);
   };
 
+  //!So to get the exact details when searched you when the user input changes it mounts and it fetches the data again 
   useEffect(() => {
     if (search) {
       fetchUser();
